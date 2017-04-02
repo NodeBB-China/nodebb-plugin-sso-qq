@@ -191,8 +191,11 @@
                     uid: uid
                 });
             } else {
+                //为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
+                let email = qqID+"@norelpy.qq.com";
                 console.log("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
                 console.log("[SSO-QQ]New Account's Username：" + username);
+				console.log("[SSO-QQ]New Account's Email：" + email);
 				// New User 
 				
 				/**
@@ -209,7 +212,7 @@
 				//End
 				
 				//From SSO-Twitter
-				User.create({username: username}, function (err, uid) {
+				User.create({username: username,email:email}, function (err, uid) {
 					if (err) {
 						return callback(err);
 					}
