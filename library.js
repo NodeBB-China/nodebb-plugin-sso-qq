@@ -102,7 +102,7 @@
                         
                         if (profile.ret == -1){ // Try Catch Error
                             console.log("[SSO-QQ]The Profile return -1,skipped.");
-                            return done(null,false);
+                            return done("There's something wrong with your request or QQ Connect API.Please try again.",false);
                         }
                         
                         //存储头像信息
@@ -113,6 +113,11 @@
                     
                     //如果用户已经登录，那么我们就绑定他    
                     if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
+						//如果用户想重复绑定的话，我们就拒绝他。
+						if(QQ.getQQIDbyuid(req.user.uid) == profile.id){
+						    done("You have binded a QQ account.If you want to bind another one ,please unbind your accound.",flase);
+						}
+						
 						// Save qq-specific information to the user
 						console.log("[SSO-QQ]User is logged.Binding.");
 						console.log("[SSO-QQ]req.user:");
@@ -121,6 +126,8 @@
 						db.setObjectField('qqid:uid', profile.id, req.user.uid);
 						console.log(`[SSO-QQ] ${req.user.uid} is binded.`);
 						return done(null,req.user);
+						
+						
 					}
                     
                     //登录方法
@@ -150,6 +157,18 @@
             callback(null, strategies);
         });
     };
+    
+    //通过UID获取QQid    
+    QQ.getQQIDbyuid = function(uid){
+        db.getObjectField('uid:qqid', uid, function(err, qqid) {
+			if (err) {
+				console.log(`[SSO-QQ]get a error:${err},While get QQID by uid`);
+				return false;
+			} else {
+				return qqid;
+			}
+		});
+    }
     
     
     QQ.getAssociation = function(data, callback) {
@@ -208,7 +227,7 @@
 				    // 去掉转义字符  
 				    username = username.replace(/[\'\"\\\/\b\f\n\r\t]/g, '');
 				    //去除特殊符号
-				    username = username.replace(/[\@\#\$\%\^\&\*\{\}\:\"\L\?]/,"");
+				    username = username.replace(/[\@\#\$\%\^\&\*\{\}\:\"\L\?\\(\)]/,""); //2017.04.16 增加括号
 				//End
 				
 				//From SSO-Twitter
@@ -274,6 +293,7 @@
 			async.apply(User.getUserField, uid, 'qqid'),
 			function (oAuthIdToDelete, next) {
 				db.deleteObjectField('qqid:uid', oAuthIdToDelete, next);
+				console.log(`[sso-qq]uid: ${uid} 's data have removed succesfully.`);
 			}
 		], function (err) {
 			if (err) {

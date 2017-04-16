@@ -1,7 +1,7 @@
 {
   "name": "nodebb-plugin-sso-qq-fix",
 
-  "version": "1.3.6",
+  "version": "1.4.0-dev1",
   "description": "NodeBB Plugin that allows users to login/register via their QQ account.",
   "main": "library.js",
   "repository": {
@@ -37,6 +37,6 @@
     "passport-qq2015-fix": "2.0.1"
   },
   "nbbpm": {
-    "compatibility": "^1.5.0"
+    "compatibility": ">=0.7.0"
   }
 }
