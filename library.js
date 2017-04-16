@@ -288,6 +288,11 @@
         data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
         callback();
     };
+    //预留解绑的锅子
+    QQ.unbindedQQID = function(uid){
+        
+    }
+    //删除用户时触发的事件
     QQ.deleteUserData = function (uid, callback) {
 		async.waterfall([
 			async.apply(User.getUserField, uid, 'qqid'),
