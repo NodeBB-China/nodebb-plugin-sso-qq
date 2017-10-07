@@ -8,6 +8,7 @@
         meta = module.parent.require('./meta'),
         async = module.parent.require('async'),
         nconf = module.parent.require('nconf'),
+        utils = module.parent.require('../public/src/utils'),
         passport = module.parent.require('passport'),
         QQStrategy = require('passport-qq2015-fix').Strategy,
         fs = module.parent.require('fs'),
@@ -286,6 +287,21 @@
         }
         data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
         data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
+        data.router.get('/sso-qq/register',data.middleware.buildHeader,function(req,res,next){
+            if(req.session.qqid && !req.hasOwnProperty('user') && !req.user.hasOwnProperty('uid') && req.user.uid <= 0 ){
+                let token = utils.generateUUID().replace(/-/g, '').slice(0, 20);
+                req.session.qqreglock = {
+                    ts : parseInt(Date.now().toString().slice(0,10)),
+                    token: token
+                };
+                res.render(qq-register,{token:token});
+            }else{
+                res.status(403).send("Fuck You! Wrong Request!");
+            }
+        });
+        data.router.post('/sso-qq/register',function(req,res,next){
+            
+        });
         callback();
     };
     //预留解绑的锅子
