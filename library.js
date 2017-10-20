@@ -178,7 +178,7 @@
                                 // Save their photo, if present
                                 User.setUserField(uid, 'picture', avatar);
                                 User.setUserField(uid, 'qqpic', avatar);
-                                
+
                                 //require email
                                 req.session.registration = req.session.registration || {};
                                 req.session.registration.uid = uid;
@@ -262,7 +262,7 @@
         //   - email ends with "@noreply.qq.com"
         if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
             User.getUserField(data.userData.uid, 'email', function (err, email) {
-                if (email && email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
+                if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
                     data.interstitials.push({
                         template: 'partials/sso-qq/email.tpl',
                         data: {},
