@@ -38,57 +38,57 @@
                     clientSecret: settings['secret'],
                     callbackURL: nconf.get('url') + '/auth/qq/callback',
                     passReqToCallback: true
-                }, function (req, accessToken, refreshToken, profile_text, done) {
-                    profile = JSON.parse(profile_text);
-                    if (!profile) {
-                        return done(null, false);
+                }, function (req, accessToken, refreshToken, profile, done) {
+                    var profile = JSON.parse(profile);
+                    if (profile.ret == -1) { // Try Catch Error
+                        winston.error("[SSO-QQ]The Profile return -1,skipped.");
+                        return done("There's something wrong with your request or QQ Connect API.Please try again.", false);
+                    }
+                    //存储头像信息
+                    var avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2; // Set avatar image
+                    avatar = avatar.replace("http://", "https://");
+                    //如果用户已经登录，那么我们就绑定他    
+                    if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
+                        //如果用户想重复绑定的话，我们就拒绝他。
+                        QQ.hasQQID(profile.id, function (err, res) {
+                            if (err) {
+                                winston.error(err);
+                                return done(err);
+                            } else {
+                                if (res) {
+                                    winston.error('[sso-qq] qqid:' + qqid + 'is binded.');
+                                    //qqid is exist
+                                    return done("You have binded a QQ account.If you want to bind another one ,please unbind your accound.", false);
+                                } else {
+                                    User.setUserField(req.user.uid, 'qqid', profile.id);
+                                    db.setObjectField('qqid:uid', profile.id, req.user.uid);
+                                    User.setUserField(uid, 'qqpic', avatar);
+                                    winston.verbose('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
+                                    return done(null, req.user);
+                                }
+                            }
+                        });
                     } else {
-                        if (profile.ret == -1) { // Try Catch Error
-                            winston.error("[SSO-QQ]The Profile return -1,skipped.");
-                            return done("There's something wrong with your request or QQ Connect API.Please try again.", false);
-                        }
-                        //存储头像信息
-                        var avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2; // Set avatar image
-                        avatar = avatar.replace("http://", "https://");
-                        //如果用户已经登录，那么我们就绑定他    
-                        if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-                            //如果用户想重复绑定的话，我们就拒绝他。
-                            QQ.hasQQID(profile.id, function (err, res) {
-                                if (err) {
-                                    winston.error(err);
-                                    return done(err);
-                                } else {
-                                    if (res) {
-                                        winston.error('[sso-qq] qqid:' + qqid + 'is binded.');
-                                        //qqid is exist
-                                        return done("You have binded a QQ account.If you want to bind another one ,please unbind your accound.", false);
-                                    } else {
-                                        User.setUserField(req.user.uid, 'qqid', profile.id);
-                                        db.setObjectField('qqid:uid', profile.id, req.user.uid);
-                                        User.setUserField(uid, 'qqpic', avatar);
-                                        winston.verbose('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
-                                        return done(null, req.user);
-                                    }
+                        //登录方法
+                        QQ.login(profile.id, profile.nickname, avatar, function (err, user) { //3.29 add avatar
+                            if (err) {
+                                return done(err);
+                            } else {
+                                // Require collection of email
+                                if (email.endsWith('@norelpy.qq.com' || email.endsWith('@noreply.qq.com'))) {
+                                    req.session.registration = req.session.registration || {};
+                                    req.session.registration.uid = user.uid;
+                                    req.session.registration.qqid = profile.id;
                                 }
-                            });
-                        } else {
-                            //登录方法
-                            QQ.login(profile.id, profile.nickname, avatar, function (err, user) { //3.29 add avatar
-                                if (err) {
-                                    return done(err);
-                                } else {
-                                    // Require collection of email
-                                    if (email.endsWith('@norelpy.qq.com' || email.endsWith('@noreply.qq.com'))) {
-                                        req.session.registration = req.session.registration || {};
-                                        req.session.registration.uid = user.uid;
-                                        req.session.registration.qqid = profile.id;
+                                authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
+                                    if(err){
+                                        return done(err);
+                                    }else{
+                                        return done(null,user);
                                     }
-                                    authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
-                                        done(err, err ? null : user);
-                                    });
-                                }
-                            });
-                        }
+                                });
+                            }
+                        });
                     }
                 }));
 
@@ -111,7 +111,13 @@
 
     //通过UID获取QQid    
     QQ.hasQQID = function (qqid, callback) {
-        db.getObjectField('qqid:uid', qqid, callback);
+        db.isObjectField('qqid:uid', qqid, function(err,res){
+            if(err){
+                callback(err);
+            }else{
+                callback(null,res);
+            }
+        });
     };
 
     QQ.getAssociation = function (data, callback) {
@@ -145,10 +151,10 @@
                 return callback(err);
             }
 
-            console.log("[SSO-QQ]uid:" + uid);
+            //winston.verbose("[SSO-QQ]uid:" + uid);
             if (uid !== null) {
                 // Existing User
-                console.log("[SSO-QQ]User:" + uid + " is logged via sso-qq");
+                winston.verbose("[SSO-QQ]User:" + uid + " is logged via sso-qq");
                 User.setUserField(uid, 'qqpic', avatar); //更新头像
                 return callback(null, {
                     uid: uid
@@ -247,7 +253,7 @@
         //   - uid and fbid are set in session
         //   - email ends with "@noreply.qq.com"
         if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
-            user.getUserField(data.userData.uid, 'email', function (err, email) {
+            User.getUserField(data.userData.uid, 'email', function (err, email) {
                 if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
                     data.interstitials.push({
                         template: 'partials/sso-qq/email.tpl',
@@ -299,7 +305,7 @@
         });
     };
     QQ.getQQPicture = function (uid, callback) {
-        user.getUserField(uid, 'qqpic', function (err, pic) {
+        User.getUserField(uid, 'qqpic', function (err, pic) {
             if (err) {
                 return callback(err);
             }
@@ -311,13 +317,13 @@
         async.waterfall([
             // Reset email confirm throttle
             async.apply(db.delete, 'uid:' + userData.uid + ':confirm:email:sent'),
-            async.apply(user.getUserField, userData.uid, 'email'),
+            async.apply(User.getUserField, userData.uid, 'email'),
             function (email, next) {
                 // Remove the old email from sorted set reference
                 db.sortedSetRemove('email:uid', email, next);
             },
-            async.apply(user.setUserField, userData.uid, 'email', data.email),
-            async.apply(user.email.sendValidationEmail, userData.uid, data.email)
+            async.apply(User.setUserField, userData.uid, 'email', data.email),
+            async.apply(User.email.sendValidationEmail, userData.uid, data.email)
         ], callback);
     };
     module.exports = QQ;
