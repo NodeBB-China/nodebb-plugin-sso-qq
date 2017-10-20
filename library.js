@@ -220,7 +220,6 @@
         }
         data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
         data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
-    });
     callback();
 };
 //删除用户时触发的事件
