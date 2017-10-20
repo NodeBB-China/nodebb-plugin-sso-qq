@@ -5,15 +5,47 @@
     "url": "https://github.com/NodeBB-China/nodebb-plugin-sso-qq-fix",
     "library": "./library.js",
     "hooks": [
-        {"hook": "static:app.load", "method": "init"},
-        {"hook": "filter:auth.init", "method": "getStrategy"},
-        {"hook": "filter:auth.list", "method": "getAssociation" },
-        {"hook": "filter:user.delete", "method": "deleteUserData" },
-        {"hook": "filter:admin.header.build", "method": "addMenuItem"}
+        {
+            "hook": "static:app.load",
+            "method": "init"
+        },
+        {
+            "hook": "filter:auth.init",
+            "method": "getStrategy"
+        },
+        {
+            "hook": "static:user.delete",
+            "method": "deleteUserData"
+        },
+        {
+            "hook": "filter:auth.list",
+            "method": "getAssociation"
+        },
+        {
+            "hook": "filter:admin.header.build",
+            "method": "addMenuItem"
+        },
+        {
+            "hook": "filter:user.listPictures",
+            "method": "list"
+        },
+        {
+            "hook": "filter:user.getPicture",
+            "method": "get"
+        },
+        {
+            "hook": "filter:register.interstitial",
+            "method": "prepareInterstitial"
+        }
     ],
-    "templates": "./templates",
+    "staticDirs": {
+        "static": "./static"
+    },
+    "templates": "static/templates",
+    "less": [
+        "static/less/style.less"
+    ],
     "acpScripts": [
-		"static/lib/admin.js"
-	]
-
+        "static/lib/admin.js"
+    ]
 }
