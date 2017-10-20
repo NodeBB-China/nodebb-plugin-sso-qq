@@ -56,7 +56,7 @@
                                 return done(err);
                             } else {
                                 if (res) {
-                                    winston.error('[sso-qq] qqid:' + qqid + 'is binded.');
+                                    winston.error('[sso-qq] qqid:' + profile.id + 'is binded.');
                                     //qqid is exist
                                     return done("You have binded a QQ account.If you want to bind another one ,please unbind your accound.", false);
                                 } else {
@@ -70,7 +70,8 @@
                         });
                     } else {
                         //登录方法
-                        QQ.login(profile.id, profile.nickname, avatar, function (err, user) { //3.29 add avatar
+                        var email = profile.id + '@noreply.qq.com';
+                        QQ.login(profile.id, profile.nickname, avatar, email, function (err, user) { //3.29 add avatar
                             if (err) {
                                 return done(err);
                             } else {
@@ -81,10 +82,10 @@
                                     req.session.registration.qqid = profile.id;
                                 }
                                 authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
-                                    if(err){
+                                    if (err) {
                                         return done(err);
-                                    }else{
-                                        return done(null,user);
+                                    } else {
+                                        return done(null, user);
                                     }
                                 });
                             }
@@ -111,11 +112,11 @@
 
     //通过UID获取QQid    
     QQ.hasQQID = function (qqid, callback) {
-        db.isObjectField('qqid:uid', qqid, function(err,res){
-            if(err){
+        db.isObjectField('qqid:uid', qqid, function (err, res) {
+            if (err) {
                 callback(err);
-            }else{
-                callback(null,res);
+            } else {
+                callback(null, res);
             }
         });
     };
@@ -145,7 +146,7 @@
             callback(null, data);
         })
     };
-    QQ.login = function (qqID, username, avatar, callback) {
+    QQ.login = function (qqID, username, avatar, email, callback) {
         QQ.getUidByQQID(qqID, function (err, uid) {
             if (err) {
                 return callback(err);
@@ -161,7 +162,6 @@
                 });
             } else {
                 //为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
-                let email = qqID + "@noreply.qq.com";
                 winston.verbose("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
                 winston.verbose("[SSO-QQ]New Account's Username：" + username + "and openid:" + qqID);
                 // New User             
