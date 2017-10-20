@@ -54,7 +54,7 @@
                         //如果用户已经登录，那么我们就绑定他    
                         if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
                             //如果用户想重复绑定的话，我们就拒绝他。
-                            QQ.hasQQID(req.user.uid, function (err, res) {
+                            QQ.hasQQID(profile.id, function (err, res) {
                                 if (err) {
                                     winston.error(err);
                                     return done(err);
