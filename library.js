@@ -241,16 +241,16 @@
         callback();
     };
     //删除用户时触发的事件
-    QQ.deleteUserData = function (uid, callback) {
+    QQ.deleteUserData = function (data, callback) {
+        var uid = data.uid;
         async.waterfall([
-            async.apply(User.getUserField, uid, 'qqid'),
+            async.apply(user.getUserField, uid, 'qqid'),
             function (oAuthIdToDelete, next) {
                 db.deleteObjectField('qqid:uid', oAuthIdToDelete, next);
-                winston.verbose('[sso-qq]uid: ' + uid + ' \'s data have removed succesfully.');
             }
         ], function (err) {
             if (err) {
-                winston.error('[sso-qq] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
+                winston.error('[sso-facebook] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
                 return callback(err);
             }
             callback(null, uid);
