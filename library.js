@@ -244,7 +244,7 @@
     QQ.deleteUserData = function (data, callback) {
         var uid = data.uid;
         async.waterfall([
-            async.apply(user.getUserField, uid, 'qqid'),
+            async.apply(User.getUserField, uid, 'qqid'),
             function (oAuthIdToDelete, next) {
                 db.deleteObjectField('qqid:uid', oAuthIdToDelete, next);
             }
