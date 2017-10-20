@@ -66,7 +66,7 @@
                                     } else {
                                         User.setUserField(req.user.uid, 'qqid', profile.id);
                                         db.setObjectField('qqid:uid', profile.id, req.user.uid);
-                                        User.setUserField(uid,'qqpic',avatar);
+                                        User.setUserField(uid, 'qqpic', avatar);
                                         winston.verbose('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
                                         return done(null, req.user);
                                     }
@@ -78,16 +78,17 @@
                                 if (err) {
                                     return done(err);
                                 } else {
-                                    authenticationController.onSuccessfulLogin(req, user.uid,function(err){
-                                        done(err,err ? null : user);
+                                    authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
+                                        done(err, err ? null : user);
                                     });
                                 }
                             });
 
 
                         }
-                    }));
-            }
+                    }
+                }));
+            };
 
 
             //定义本插件的一些信息
@@ -99,127 +100,126 @@
                 scope: 'get_user_info'
 
             });
-        }
-
-            callback(null, strategies);
-    });
-};
-    
-//通过UID获取QQid    
-QQ.hasQQID = function (qqid, callback) {
-    db.getObjectField('qqid:uid', qqid, callback);
-};
-
-QQ.getAssociation = function (data, callback) {
-    User.getUserField(data.uid, 'qqid', function (err, qqid) {
-        if (err) {
-            return callback(err, data);
-        }
-
-        if (qqid) {
-            data.associations.push({
-                associated: true,
-                name: constants.name,
-                icon: constants.admin.icon
-
-            });
-        } else {
-            data.associations.push({
-                associated: false,
-                url: nconf.get('url') + '/auth/qq',
-                name: constants.name,
-                icon: constants.admin.icon
-            });
-        }
-
-        callback(null, data);
-    })
-};
-QQ.login = function (qqID, username, avatar, callback) {
-    QQ.getUidByQQID(qqID, function (err, uid) {
-        if (err) {
-            return callback(err);
-        }
-
-        console.log("[SSO-QQ]uid:" + uid);
-        if (uid !== null) {
-            // Existing User
-            console.log("[SSO-QQ]User:"+uid+" is logged via sso-qq");
-            User.setUserField(uid,'qqpic',avatar); //更新头像
-            return callback(null, {
-                uid: uid
-            });
-        } else {
-            //为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
-            let email = qqID + "@noreply.qq.com";
-            winston.verbose("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
-            winston.verbose("[SSO-QQ]New Account's Username：" + username + "and openid:" + qqID);
-            // New User             
-            //From SSO-Twitter
-            User.create({ username: username, email: email }, function (err, uid) {
-                if (err) {
-                    User.create({ username: 'QQ-' + qqID, email: email }, function (err, uid) {
-                        if (err) {
-                            return callback(err);
-                        } else {
-                            // Save qq-specific information to the user
-                            User.setUserField(uid, 'qqid', qqID);
-                            db.setObjectField('qqid:uid', qqID, uid);
-                            // Save their photo, if present
-                            User.setUserField(uid, 'picture', avatar);
-                            User.setUserField(uid,'qqpic',avatar);
-                            callback(null, {
-                                uid: uid
-                            });
-
-                        }
-                    });
-                } else {
-                    // Save qq-specific information to the user
-                    User.setUserField(uid, 'qqid', qqID);
-                    db.setObjectField('qqid:uid', qqID, uid);
-                    // Save their photo, if present
-                    User.setUserField(uid, 'picture', avatar);
-                    User.setUserField(uid,'qqpic',avatar);
-                    callback(null, {
-                        uid: uid
-                    });
-                }
-            });
-
-        }
-
-    });
-};
-
-QQ.getUidByQQID = function (qqID, callback) {
-    db.getObjectField('qqid:uid', qqID, function (err, uid) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, uid);
-        }
-    });
-};
-
-QQ.addMenuItem = function (custom_header, callback) {
-    custom_header.authentication.push({
-        "route": constants.admin.route,
-        "icon": constants.admin.icon,
-        "name": "QQ 社会化登陆"
-    });
-
-    callback(null, custom_header);
-};
-
-QQ.init = function (data, callback) {
-    function renderAdmin(req, res) {
-        res.render('admin/plugins/sso-qq', {
-            callbackURL: nconf.get('url') + '/auth/qq/callback'
         });
-    }
-    data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
-    data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
+        callback(null, strategies);
+
+    };
+
+    //通过UID获取QQid    
+    QQ.hasQQID = function (qqid, callback) {
+        db.getObjectField('qqid:uid', qqid, callback);
+    };
+
+    QQ.getAssociation = function (data, callback) {
+        User.getUserField(data.uid, 'qqid', function (err, qqid) {
+            if (err) {
+                return callback(err, data);
+            }
+
+            if (qqid) {
+                data.associations.push({
+                    associated: true,
+                    name: constants.name,
+                    icon: constants.admin.icon
+
+                });
+            } else {
+                data.associations.push({
+                    associated: false,
+                    url: nconf.get('url') + '/auth/qq',
+                    name: constants.name,
+                    icon: constants.admin.icon
+                });
+            }
+
+            callback(null, data);
+        })
+    };
+    QQ.login = function (qqID, username, avatar, callback) {
+        QQ.getUidByQQID(qqID, function (err, uid) {
+            if (err) {
+                return callback(err);
+            }
+
+            console.log("[SSO-QQ]uid:" + uid);
+            if (uid !== null) {
+                // Existing User
+                console.log("[SSO-QQ]User:" + uid + " is logged via sso-qq");
+                User.setUserField(uid, 'qqpic', avatar); //更新头像
+                return callback(null, {
+                    uid: uid
+                });
+            } else {
+                //为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
+                let email = qqID + "@noreply.qq.com";
+                winston.verbose("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
+                winston.verbose("[SSO-QQ]New Account's Username：" + username + "and openid:" + qqID);
+                // New User             
+                //From SSO-Twitter
+                User.create({ username: username, email: email }, function (err, uid) {
+                    if (err) {
+                        User.create({ username: 'QQ-' + qqID, email: email }, function (err, uid) {
+                            if (err) {
+                                return callback(err);
+                            } else {
+                                // Save qq-specific information to the user
+                                User.setUserField(uid, 'qqid', qqID);
+                                db.setObjectField('qqid:uid', qqID, uid);
+                                // Save their photo, if present
+                                User.setUserField(uid, 'picture', avatar);
+                                User.setUserField(uid, 'qqpic', avatar);
+                                callback(null, {
+                                    uid: uid
+                                });
+
+                            }
+                        });
+                    } else {
+                        // Save qq-specific information to the user
+                        User.setUserField(uid, 'qqid', qqID);
+                        db.setObjectField('qqid:uid', qqID, uid);
+                        // Save their photo, if present
+                        User.setUserField(uid, 'picture', avatar);
+                        User.setUserField(uid, 'qqpic', avatar);
+                        callback(null, {
+                            uid: uid
+                        });
+                    }
+                });
+
+            }
+
+        });
+    };
+
+    QQ.getUidByQQID = function (qqID, callback) {
+        db.getObjectField('qqid:uid', qqID, function (err, uid) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, uid);
+            }
+        });
+    };
+
+    QQ.addMenuItem = function (custom_header, callback) {
+        custom_header.authentication.push({
+            "route": constants.admin.route,
+            "icon": constants.admin.icon,
+            "name": "QQ 社会化登陆"
+        });
+
+        callback(null, custom_header);
+    };
+
+    QQ.init = function (data, callback) {
+        function renderAdmin(req, res) {
+            res.render('admin/plugins/sso-qq', {
+                callbackURL: nconf.get('url') + '/auth/qq/callback'
+            });
+        }
+        data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
+        data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
     });
     callback();
 };
@@ -229,7 +229,7 @@ QQ.deleteUserData = function (uid, callback) {
         async.apply(User.getUserField, uid, 'qqid'),
         function (oAuthIdToDelete, next) {
             db.deleteObjectField('qqid:uid', oAuthIdToDelete, next);
-            winston.verbose('[sso-qq]uid: '+uid+' \'s data have removed succesfully.');
+            winston.verbose('[sso-qq]uid: ' + uid + ' \'s data have removed succesfully.');
         }
     ], function (err) {
         if (err) {
@@ -239,83 +239,83 @@ QQ.deleteUserData = function (uid, callback) {
         callback(null, uid);
     });
 };
-QQ.prepareInterstitial = (data,callback) => {
-// Only execute if:
-  //   - uid and fbid are set in session
-  //   - email ends with "@noreply.qq.com"
-  if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
-    user.getUserField(data.userData.uid, 'email', function (err, email) {
-      if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
-        data.interstitials.push({
-          template: 'partials/sso-qq/email.tpl',
-          data: {},
-          callback: QQ.storeAdditionalData
-        });
-      }
+QQ.prepareInterstitial = (data, callback) => {
+    // Only execute if:
+    //   - uid and fbid are set in session
+    //   - email ends with "@noreply.qq.com"
+    if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
+        user.getUserField(data.userData.uid, 'email', function (err, email) {
+            if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
+                data.interstitials.push({
+                    template: 'partials/sso-qq/email.tpl',
+                    data: {},
+                    callback: QQ.storeAdditionalData
+                });
+            }
 
-      callback(null, data);
-    });
-  } else {
-    callback(null, data);
-  }
+            callback(null, data);
+        });
+    } else {
+        callback(null, data);
+    }
 };
-QQ.get = (data,callback) => {
+QQ.get = (data, callback) => {
     if (data.type === 'qq') {
         QQ.getQQPicture(data.uid, function (err, QQPicture) {
-          if (err) {
-            winston.error(err);
-            return callback(null, data);
-          }
-          if (QQPicture == null) {
-            winston.error("[sso-qq]uid:" + data.uid + "is invalid,skipping...");
-            return callback(null, data);
-          }
-          data.picture = QQPicture;
-          callback(null, data);
+            if (err) {
+                winston.error(err);
+                return callback(null, data);
+            }
+            if (QQPicture == null) {
+                winston.error("[sso-qq]uid:" + data.uid + "is invalid,skipping...");
+                return callback(null, data);
+            }
+            data.picture = QQPicture;
+            callback(null, data);
         });
-      } else {
+    } else {
         callback(null, data);
-      }
+    }
 };
-QQ.list = (data,callback) => {
+QQ.list = (data, callback) => {
     QQ.getQQPicture(data.uid, function (err, QQPicture) {
         if (err) {
-          winston.error(err);
-          return callback(null, data);
+            winston.error(err);
+            return callback(null, data);
         }
         if (QQPicture == null) {
-          winston.error("[sso-qq]uid:" + data.uid + "is invalid,skipping...");
-          return callback(null, data);
+            winston.error("[sso-qq]uid:" + data.uid + "is invalid,skipping...");
+            return callback(null, data);
         }
         data.pictures.push({
-          type: 'qq',
-          url: QQPicture,
-          text: 'QQ头像'
+            type: 'qq',
+            url: QQPicture,
+            text: 'QQ头像'
         });
         callback(null, data);
-      });
+    });
 };
 QQ.getQQPicture = function (uid, callback) {
     user.getUserField(uid, 'qqpic', function (err, pic) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, pic);
+        if (err) {
+            return callback(err);
+        }
+        callback(null, pic);
     });
 };
-  
+
 QQ.storeAdditionalData = function (userData, data, callback) {
     async.waterfall([
-      // Reset email confirm throttle
-      async.apply(db.delete, 'uid:' + userData.uid + ':confirm:email:sent'),
-      async.apply(user.getUserField, userData.uid, 'email'),
-      function (email, next) {
-        // Remove the old email from sorted set reference
-        db.sortedSetRemove('email:uid', email, next);
-      },
-      async.apply(user.setUserField, userData.uid, 'email', data.email),
-      async.apply(user.email.sendValidationEmail, userData.uid, data.email)
+        // Reset email confirm throttle
+        async.apply(db.delete, 'uid:' + userData.uid + ':confirm:email:sent'),
+        async.apply(user.getUserField, userData.uid, 'email'),
+        function (email, next) {
+            // Remove the old email from sorted set reference
+            db.sortedSetRemove('email:uid', email, next);
+        },
+        async.apply(user.setUserField, userData.uid, 'email', data.email),
+        async.apply(user.email.sendValidationEmail, userData.uid, data.email)
     ], callback);
-  };
+};
 module.exports = QQ;
 }(module));
