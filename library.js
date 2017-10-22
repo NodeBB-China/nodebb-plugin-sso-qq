@@ -178,11 +178,6 @@
                                 // Save their photo, if present
                                 User.setUserField(uid, 'picture', avatar);
                                 User.setUserField(uid, 'qqpic', avatar);
-
-                                //require email
-                                req.session.registration = req.session.registration || {};
-                                req.session.registration.uid = uid;
-                                req.session.registration.qqid = qqID;
                                 callback(null, {
                                     uid: uid
                                 });
@@ -196,9 +191,6 @@
                         // Save their photo, if present
                         User.setUserField(uid, 'picture', avatar);
                         User.setUserField(uid, 'qqpic', avatar);
-                        req.session.registration = req.session.registration || {};
-                        req.session.registration.uid = uid;
-                        req.session.registration.qqid = qqID;
                         callback(null, {
                             uid: uid
                         });
@@ -253,7 +245,7 @@
                 winston.error('[sso-facebook] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
                 return callback(err);
             }
-            callback(null, uid);
+            callback(null, data);
         });
     };
     QQ.prepareInterstitial = (data, callback) => {
