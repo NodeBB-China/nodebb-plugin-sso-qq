@@ -1,7 +1,7 @@
 {
   "name": "nodebb-plugin-sso-qq-fix",
 
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "NodeBB Plugin that allows users to login/register via their QQ account.",
   "main": "library.js",
   "repository": {
