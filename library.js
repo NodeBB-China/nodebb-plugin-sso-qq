@@ -63,7 +63,7 @@
                                     User.setUserField(req.user.uid, 'qqid', profile.id);
                                     db.setObjectField('qqid:uid', profile.id, req.user.uid);
                                     User.setUserField(uid, 'qqpic', avatar);
-                                    winston.verbose('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
+                                    winston.info('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
                                     return done(null, req.user);
                                 }
                             }
@@ -155,15 +155,15 @@
             //winston.verbose("[SSO-QQ]uid:" + uid);
             if (uid !== null) {
                 // Existing User
-                winston.verbose("[SSO-QQ]User:" + uid + " is logged via sso-qq");
+                winston.info("[SSO-QQ]User:" + uid + " is logged via sso-qq");
                 User.setUserField(uid, 'qqpic', avatar); //更新头像
                 return callback(null, {
                     uid: uid
                 });
             } else {
                 //为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
-                winston.verbose("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
-                winston.verbose("[SSO-QQ]New Account's Username：" + username + "and openid:" + qqID);
+                winston.info("[SSO-QQ]User isn't Exist.Try to Creat a new account.");
+                winston.info("[SSO-QQ]New Account's Username：" + username + "and openid:" + qqID);
                 // New User             
                 //From SSO-Twitter
                 User.create({ username: username, email: email }, function (err, uid) {
@@ -320,6 +320,8 @@
             async.apply(User.getUserField, userData.uid, 'email'),
             function (email, next) {
                 // Remove the old email from sorted set reference
+                winston.verbose(email);
+                email = email.toLowerCase();
                 db.sortedSetRemove('email:uid', email, next);
             },
             async.apply(User.setUserField, userData.uid, 'email', data.email),
