@@ -320,7 +320,6 @@
             async.apply(User.getUserField, userData.uid, 'email'),
             function (email, next) {
                 // Remove the old email from sorted set reference
-                winston.verbose(email);
                 email = email.toLowerCase();
                 db.sortedSetRemove('email:uid', email, next);
             },
