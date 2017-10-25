@@ -42,7 +42,7 @@
                     var profile = JSON.parse(profile);
                     if (profile.ret == -1) { // Try Catch Error
                         winston.error("[SSO-QQ]The Profile return -1,skipped.");
-                        return done("There's something wrong with your request or QQ Connect API.Please try again.", false);
+                        return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."), false);
                     }
                     //存储头像信息
                     var avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2; // Set avatar image
@@ -58,7 +58,7 @@
                                 if (res) {
                                     winston.error('[sso-qq] qqid:' + profile.id + 'is binded.');
                                     //qqid is exist
-                                    return done("You have binded a QQ account.If you want to bind another one ,please unbind your accound.", false);
+                                    return done(new Error("You have binded a QQ account.If you want to bind another one ,please unbind your accound."), false);
                                 } else {
                                     User.setUserField(req.user.uid, 'qqid', profile.id);
                                     db.setObjectField('qqid:uid', profile.id, req.user.uid);
