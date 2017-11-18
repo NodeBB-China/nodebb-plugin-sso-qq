@@ -10,7 +10,7 @@
 			</div>
 		<div class="alert alert-info">
 			<p>
-				注册 <strong> <a href="https://github.com/settings/developers">QQ互联</a></strong> ,然后把你的APP ID和APP Key复制到下面
+				注册 <strong> <a href="https://connect.qq.com/manage.html#/appcreate/web">QQ互联</a></strong> ,然后把你的APP ID和APP Key复制到下面
 				
 			</p>
 		</div>
