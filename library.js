@@ -239,11 +239,11 @@
     data.router.post('/deauth/qq', data.middleware.requireUser, function (req, res, next) {
       QQ.deleteUserData({
         uid: req.user.uid
-      }, function (err) {
+      }, function (err, uid) {
         if (err) {
           return next(err)
         }
-        User.getUserField(req.user.uid, 'userslug', userslug, function (err, userslug) {
+        User.getUserField(uid, 'userslug', function (err, userslug) {
           if (err) {
             return next(err)
           }
