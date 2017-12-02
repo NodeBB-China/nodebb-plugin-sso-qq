@@ -130,8 +130,7 @@
             if (qqid) {
                 data.associations.push({
                     associated: true,
-					url: 'https://plus.google.com/' + gplusid + '/posts',
-					deauthUrl: nconf.get('url') + '/deauth/google',
+					deauthUrl: nconf.get('url') + '/deauth/qq',
 					name: constants.name,
                     icon: constants.admin.icon
                 });
@@ -233,7 +232,7 @@
         data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
         data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
         hostHelpers.setupPageRoute(data.router, '/deauth/qq', data.middleware, [data.middleware.requireUser], function (req, res) {
-            res.render('plugins/sso-qq/deauth', {
+            res.render('partials/sso-qq/deauth', {
                 service: "QQ",
             });
         });
