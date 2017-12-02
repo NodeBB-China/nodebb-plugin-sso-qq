@@ -63,7 +63,7 @@
                                     User.setUserField(req.user.uid, 'qqid', profile.id);
                                     db.setObjectField('qqid:uid', profile.id, req.user.uid);
                                     User.setUserField(req.user.uid, 'qqpic', avatar);
-                                    winston.info('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + nickname + ')');
+                                    winston.info('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')');
                                     return done(null, req.user);
                                 }
                             }

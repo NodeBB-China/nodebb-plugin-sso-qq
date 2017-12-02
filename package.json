@@ -1,7 +1,6 @@
 {
   "name": "nodebb-plugin-sso-qq-fix",
-
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "NodeBB Plugin that allows users to login/register via their QQ account.",
   "main": "library.js",
   "repository": {
@@ -17,9 +16,9 @@
     "registration"
   ],
   "author": {
-      "name": "A632079",
-      "email": "a632079@gmail.com"
-    },
+    "name": "A632079",
+    "email": "a632079@gmail.com"
+  },
   "contributors": [
     {
       "name": "A632079",
@@ -38,5 +37,12 @@
   },
   "nbbpm": {
     "compatibility": ">=0.7.0"
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }
