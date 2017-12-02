@@ -243,8 +243,12 @@
         if (err) {
           return next(err)
         }
-
-        res.redirect(nconf.get('relative_path') + '/user/admin/edit')
+        User.getUserField(req.user.uid, 'userslug', userslug, function (err, userslug) {
+          if (err) {
+            return next(err)
+          }
+          res.redirect(nconf.get('relative_path') + '/user/' + userslug + '/edit')
+        })
       })
     })
     callback()
@@ -257,23 +261,27 @@
 
   // 删除用户时触发的事件
   QQ.deleteUserData = function (data, callback) {
-    var uid = data.uid
+    const uid = data.uid
+
     async.waterfall([
       async.apply(User.getUserField, uid, 'qqid'),
       function (oAuthIdToDelete, next) {
         db.deleteObjectField('qqid:uid', oAuthIdToDelete, next)
+      },
+      function (next) {
+        db.deleteObjectField('user:' + uid, 'qqid', next)
       }
     ], function (err) {
       if (err) {
         winston.error('[sso-qq] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err)
         return callback(err)
       }
-      callback(null, data)
+      callback(null, uid)
     })
   }
   QQ.prepareInterstitial = (data, callback) => {
     // Only execute if:
-    //   - uid and fbid are set in session
+    //   - uid and qqid are set in session
     //   - email ends with "@noreply.qq.com"
     if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
       User.getUserField(data.userData.uid, 'email', function (err, email) {
