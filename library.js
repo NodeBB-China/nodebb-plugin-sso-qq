@@ -42,7 +42,7 @@
                     var profile = JSON.parse(profile);
                     if (profile.ret == -1) { // Try Catch Error
                         winston.error("[SSO-QQ]The Profile return -1,skipped.");
-                        return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."), false);
+                        return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."));
                     }
                     //存储头像信息
                     var avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2; // Set avatar image
@@ -130,9 +130,10 @@
             if (qqid) {
                 data.associations.push({
                     associated: true,
-                    name: constants.name,
+					url: 'https://plus.google.com/' + gplusid + '/posts',
+					deauthUrl: nconf.get('url') + '/deauth/google',
+					name: constants.name,
                     icon: constants.admin.icon
-
                 });
             } else {
                 data.associations.push({
@@ -223,6 +224,7 @@
     };
 
     QQ.init = function (data, callback) {
+        var hostHelpers = require.main.require('./src/routes/helpers');
         function renderAdmin(req, res) {
             res.render('admin/plugins/sso-qq', {
                 callbackURL: nconf.get('url') + '/auth/qq/callback'
@@ -230,8 +232,31 @@
         }
         data.router.get('/admin/plugins/sso-qq', data.middleware.admin.buildHeader, renderAdmin);
         data.router.get('/api/admin/plugins/sso-qq', renderAdmin);
+        hostHelpers.setupPageRoute(data.router, '/deauth/qq', data.middleware, [data.middleware.requireUser], function (req, res) {
+            res.render('plugins/sso-qq/deauth', {
+                service: "QQ",
+            });
+        });
+        data.router.post('/deauth/qq', data.middleware.requireUser, function (req, res, next) {
+            QQ.deleteUserData({
+                uid: req.user.uid,
+            }, function (err) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.redirect(nconf.get('relative_path') + '/user/admin/edit');
+            });
+        });
         callback();
     };
+
+    
+	QQ.appendUserHashWhitelist = function (data, callback) {
+		data.whitelist.push('qqid');
+		return setImmediate(callback, null, data);
+};
+
     //删除用户时触发的事件
     QQ.deleteUserData = function (data, callback) {
         var uid = data.uid;
@@ -242,7 +267,7 @@
             }
         ], function (err) {
             if (err) {
-                winston.error('[sso-facebook] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
+                winston.error('[sso-qq] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
                 return callback(err);
             }
             callback(null, data);

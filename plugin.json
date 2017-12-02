@@ -36,6 +36,10 @@
         {
             "hook": "filter:register.interstitial",
             "method": "prepareInterstitial"
+        },
+        {
+            "hook": "filter:user.whitelistFields",
+            "method": "appendUserHashWhitelist"
         }
     ],
     "staticDirs": {
