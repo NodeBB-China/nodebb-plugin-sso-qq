@@ -256,6 +256,7 @@
 
   QQ.appendUserHashWhitelist = function (data, callback) {
     data.whitelist.push('qqid')
+    data.whitelist.push('qqpic')
     return setImmediate(callback, null, data)
   }
 
