@@ -9,6 +9,7 @@
 			<hr>
 
 			<form method="post">
+				<input type="hidden" name="_csrf" value="{config.csrf_token}" />
 				<button class="btn btn-danger">[[user:sso.dissociate]]</button>
 			</form>
 		</div>
