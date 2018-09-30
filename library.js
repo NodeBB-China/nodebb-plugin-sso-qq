@@ -236,7 +236,7 @@
         service: 'QQ'
       })
     })
-    data.router.post('/deauth/qq', data.middleware.requireUser, function (req, res, next) {
+    data.router.post('/deauth/qq', [data.middleware.requireUser, data.middleware.applyCSRF], function (req, res, next) {
       QQ.deleteUserData({
         uid: req.user.uid
       }, function (err, uid) {
