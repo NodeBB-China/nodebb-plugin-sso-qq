@@ -39,7 +39,11 @@
           callbackURL: nconf.get('url') + '/auth/qq/callback',
           passReqToCallback: true
         }, function (req, accessToken, refreshToken, profile, done) {
-          profile = JSON.parse(profile)
+          try {
+            profile = JSON.parse(profile)
+          } catch (e) {
+            done(e)
+          }
           if (profile.ret === -1) { // Try Catch Error
             winston.error('[SSO-QQ]The Profile return -1,skipped.')
             return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."))
@@ -58,7 +62,8 @@
                 if (res) {
                   winston.error('[sso-qq] qqid:' + profile.id + 'is binded.')
                   // qqid is exist
-                  return done(new Error('You have binded a QQ account.If you want to bind another one ,please unbind your accound.'), false)
+                  return done(new Error('[[error:sso-multiple-association]]'));
+
                 } else {
                   User.setUserField(req.user.uid, 'qqid', profile.id)
                   db.setObjectField('qqid:uid', profile.id, req.user.uid)
@@ -236,6 +241,18 @@
         service: 'QQ'
       })
     })
+    data.router.get('/auth/qq/callback', function (req, res, next) {
+			// passport-qq checks that the oauth_token
+			// parameter is the same as the one it generated.
+			//
+			// Twitter does not support OAuth2, so the "state"
+			// query string argument is not present.
+      
+      //req.query.state = req.session.ssoState;
+      console.log(req.query)
+			next()
+    })
+
     data.router.post('/deauth/qq', [data.middleware.requireUser, data.middleware.applyCSRF], function (req, res, next) {
       QQ.deleteUserData({
         uid: req.user.uid
