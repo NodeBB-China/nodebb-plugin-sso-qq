@@ -36,7 +36,7 @@
     "passport-qq2015-fix": "2.0.1"
   },
   "nbbpm": {
-    "compatibility": "^1.8.2"
+    "compatibility": "^1.11.0"
   },
   "devDependencies": {
     "eslint": "*",
