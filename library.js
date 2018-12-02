@@ -3,18 +3,18 @@
   // 感谢各位的支持，如果可能，我以后会使用es6/7的技术重写本插件的
 
   // 声明所需的模块
-  const User = module.parent.require('./user')
-  const db = module.parent.require('../src/database')
-  const meta = module.parent.require('./meta')
-  const async = module.parent.require('async')
-  const nconf = module.parent.require('nconf')
-  // const utils = module.parent.require('../public/src/utils')
-  const passport = module.parent.require('passport')
+  const User = require.parent.require('./src/user')
+  const db = require.parent.require('./src/database')
+  const meta = require.parent.require('./src/meta')
+  const async = require.parent.require('async')
+  const nconf = require.parent.require('nconf')
+  // const utils = require.parent.require('./src/public/src/utils')
+  const passport = require.parent.require('passport')
   const QQStrategy = require('passport-qq2015-fix').Strategy
-  // const fs = module.parent.require('fs')
-  const winston = module.parent.require('winston')
-  // const path = module.parent.require('path')
-  const authenticationController = module.parent.require('./controllers/authentication')
+  // const fs = require.parent.require('fs')
+  const winston = require.parent.require('winston')
+  // const path = require.parent.require('path')
+  const authenticationController = require.parent.require('./src/controllers/authentication')
 
   // 定义本插件的一些信息
   const constants = Object.freeze({
