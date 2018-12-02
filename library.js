@@ -1,20 +1,20 @@
 (function (module) {
   'use strict'
-  // 感谢各位的支持，如果可能，我以后会使用es6/7的技术重写本插件的
+  // 感谢各位的支持，如果可能，我以后会使用 es6/7 的技术重写本插件的
 
   // 声明所需的模块
-  const User = require.parent.require('./src/user')
-  const db = require.parent.require('./src/database')
-  const meta = require.parent.require('./src/meta')
-  const async = require.parent.require('async')
-  const nconf = require.parent.require('nconf')
-  // const utils = require.parent.require('./src/public/src/utils')
-  const passport = require.parent.require('passport')
+  const User = require.main.require('./src/user')
+  const db = require.main.require('./src/database')
+  const meta = require.main.require('./src/meta')
+  const async = require.main.require('async')
+  const nconf = require.main.require('nconf')
+  // const utils = require.main.require('./src/public/src/utils')
+  const passport = require.main.require('passport')
   const QQStrategy = require('passport-qq2015-fix').Strategy
-  // const fs = require.parent.require('fs')
-  const winston = require.parent.require('winston')
-  // const path = require.parent.require('path')
-  const authenticationController = require.parent.require('./src/controllers/authentication')
+  // const fs = require.main.require('fs')
+  const winston = require.main.require('winston')
+  // const path = require.main.require('path')
+  const authenticationController = require.main.require('./src/controllers/authentication')
 
   // 定义本插件的一些信息
   const constants = Object.freeze({
